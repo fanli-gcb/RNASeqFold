@@ -1,0 +1,88 @@
+RNA-seq-fold v2.0 (assumes independence of individual sequencing reads - speeds up MCMC >1000x)
+======================
+SUMMARY
+======================
+
+
+======================
+DEPENDENCIES
+======================
+* A C++ compiler (e.g. g++)
+* Boost C++ Libraries (http://www.boost.org/)
+* Perl (tested with v5.8.8)
+* Several Perl modules:
+  - Getopt::Long
+  - Pod::Usage
+  - IPC::Open3
+  - Forks::Super
+* Ruby (tested with 2.0.0p195 (2013-05-14 revision 40734))
+
+
+======================
+BUILD
+======================
+  tar xzf RNASeqFold-x.x.tar.gz
+  cd RNASeqFold-x.x/
+  make
+
+This will extract the included C++, Perl, and Ruby scripts, then compile an executable binary.
+
+
+======================
+USAGE
+======================
+It is highly recommended to run RNA-seq-fold using the provided wrapper (RNASeqFold.pl).
+Note that this wrapper expects all of the included Ruby scripts as well as the compiled RNASeqFold binary to be in the same directory.
+
+  perl RNASeqFold.pl -help
+  
+will show all the available options as well as usage information.
+
+An example run follows (using the files in example/):
+
+  perl RNASeqFold.pl -ncuts 1,2,3 -rmin 40 -rmax 80 -n 30 -burn_in 2 -samp 2 -t s -numCPU 4 -outdir RNASeqFold_output -ds example/sim.ds.reads example/sim.rates example/sim.rnafold
+
+The input files:
+  sim.ds.reads - A file containing dsRNA-seq reads mapped to a sample RNA. Each row contains the READ_ID, READ_START, READ_END, and READ_CC fields in tab-delimited format.
+      READ_ID: id@@count@@length (where 'id' is an arbitrary identifier, 'count' is the number of copies of the observed read, and 'length' is the length of the read).
+      READ_START: Starting position of the mapped read (Counting from 0, inclusive, i.e. READ_START=1 means the first base of the read maps to the 2nd position of the RNA). Note that the actual
+        informative base is the one immediately 5' of the READ_START (since dsRNA-seq uses a ribonuclease that cleaves 3' of structure-specific positions).
+      READ_END: Ending position of the mapped read (Counting from 0, inclusive)
+      READ_CC: Number of mappings for the given read (e.g. a value > 1 here indicates non-unique mapping)
+  
+  sim.rates - A file containing initial estimates of the digestion rates. The first line contains comma-delimited 'uds' values (e.g. rates of digestion 3' to unpaired A, C, U, and G positions, respectively).
+      The second line contains comma-delimited 'vds' values (e.g. rates of digestion 3' to paired A, C, U, and G positions, respectively).
+  
+  sim.rnafold - An RNAfold-format file containing initial estimates of the structure. Multiple structures will be interpreted as individual starting points for MCMC threads.
+  
+The output files:
+  sim.mcmc.<n>.txt - Results of MCMC run for the <n>th starting position.
+  
+  sim.posterior.<n>.txt - Base pairing posterior for the <n>th starting position.
+
+The base pairing posterior can be visualized on a model of the RNAfold-predicted MFE structure:
+	
+	ruby annotate_svg_plot.rb example/MFE.svg example/sim.posterior.001.txt -a posterior -s -z -m 10 -e -colorscheme blue-red -hmin 0.45 -hmax 0.55 > example/MFE.posterior.001.svg
+
+======================
+PARALLEL MCMC
+======================
+Multiple, independent MCMC threads are run for each starting structure provided in the *.rnafold input file. The number of CPUs used can be controlled by the -numCPU parameter.
+Parallelization is implemented via the Forks::Super Perl module. Parallel computation within single MCMC steps is not currently implemented. 
+
+
+======================
+COPYRIGHT
+======================
+See 'LICENSE'.
+
+
+======================
+CONTACT
+======================
+If you use RNA-seq-fold, please cite:
+
+Questions or comments?
+fanli@mail.med.upenn.edu
+
+
