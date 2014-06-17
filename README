@@ -40,7 +40,7 @@ will show all the available options as well as usage information.
 
 An example run follows (using the files in example/):
 
-  perl RNASeqFold.pl -rmin 40 -rmax 80 -n 30 -burn_in 2 -samp 2 -t sd -numCPU 4 -outdir RNASeqFold_output example/sim.ds.reads example/sim.rates example/sim.rnafold
+  perl RNASeqFold.pl -rmin 40 -rmax 80 -n 30 -burn_in 2 -samp 2 -t sd -m 2 -numCPU 4 -outdir RNASeqFold_output example/sim.ds.reads example/sim.rates example/sim.rnafold
 
 The input files:
   sim.ds.reads - A file containing dsRNA-seq reads mapped to a sample RNA. Each row contains the READ_ID, READ_START, READ_END, and READ_CC fields in tab-delimited format.

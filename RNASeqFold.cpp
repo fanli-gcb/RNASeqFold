@@ -653,9 +653,21 @@ double compute_LL (std::string structure, list<Read> &reads, vector<double> &u, 
 			}
 			else {
 				// passes size restriction
-				if (model==2) {
+				if (model==1) {
 					ll = 0;
-					// contribution from modification 3' of the first position of the read
+					// contribution from digestion 5' of the first position of the read
+					ll += log(digestion_probs[i-1]);
+					// contribution from non-digestion along the length of the read
+					for (int k=i; k<j; k++) {
+						ll += log(nodigestion_probs[k]);
+					}
+					// contribution from digestion 3' of the last position of the read
+					ll += log(digestion_probs[j]);
+					ll_lookup[i][j] = ll;
+				}
+				else if (model==2) {
+					ll = 0;
+					// contribution from modification 5' of the first position of the read
 					ll += log(digestion_probs[i-1]);
 					// contribution from non-modification along the length of the read
 					for (int k=i; k<j; k++) {
